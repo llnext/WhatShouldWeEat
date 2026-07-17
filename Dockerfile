@@ -26,7 +26,7 @@ COPY package-lock.json ./
 COPY backend/package.json backend/package.json
 COPY frontend/package.json frontend/package.json
 COPY prisma prisma
-RUN npm ci --omit=dev --workspace backend --include-workspace-root=false && npm cache clean --force
+RUN npm ci --omit=dev --workspace backend --include-workspace-root=false --ignore-scripts && npm cache clean --force
 
 COPY --from=build /app/backend/dist backend/dist
 COPY --from=build /app/frontend/dist frontend/dist
