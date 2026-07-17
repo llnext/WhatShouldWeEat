@@ -1,0 +1,15 @@
+node_modules
+frontend/dist
+backend/dist
+.git
+.github
+.env
+*.log
+*.tsbuildinfo
+.DS_Store
+data/database.sqlite
+data/database.sqlite-journal
+data/uploads/*
+!data/uploads/.gitkeep
+!data/uploads/dishes/.gitkeep
+!data/uploads/avatar/.gitkeep

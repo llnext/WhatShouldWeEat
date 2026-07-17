@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int          @id @default(autoincrement())
+  username           String       @unique
+  passwordHash       String       @map("password_hash")
+  name               String
+  birthday           DateTime?
+  avatar             String?
+  role               String       @default("USER")
+  sweetPoints        Int          @default(0) @map("sweet_points")
+  mustChangePassword Boolean      @default(false) @map("must_change_password")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+  orders             MealOrder[]
+  fridgeUpdates      FridgeItem[] @relation("FridgeUpdatedBy")
+  createdTasks       Task[]       @relation("TaskCreator")
+  assignedTasks      Task[]       @relation("TaskAssignee")
+  sweetPointLogs     SweetPointLog[] @relation("SweetPointUser")
+  sweetPointActions  SweetPointLog[] @relation("SweetPointAdmin")
+
+  @@map("users")
+}
+
+model SweetPointLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  adminId   Int      @map("admin_id")
+  type      String
+  amount    Int
+  balance   Int
+  reason    String?
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation("SweetPointUser", fields: [userId], references: [id])
+  admin     User     @relation("SweetPointAdmin", fields: [adminId], references: [id])
+
+  @@map("sweet_point_logs")
+}
+
+model Dish {
+  id          Int              @id @default(autoincrement())
+  name        String
+  categoryId  Int?             @map("category_id")
+  category    Category?        @relation(fields: [categoryId], references: [id])
+  price       Int              @default(0)
+  isAvailable Boolean          @default(true) @map("is_available")
+  image       String?
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  ingredients DishIngredient[]
+  tastes      DishTaste[]
+  orders      MealOrder[]
+
+  @@map("dishes")
+}
+
+model Category {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  dishes Dish[]
+
+  @@map("categories")
+}
+
+model Ingredient {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  dishes      DishIngredient[]
+  fridgeItems FridgeItem[]
+
+  @@map("ingredients")
+}
+
+model Taste {
+  id     Int         @id @default(autoincrement())
+  name   String      @unique
+  dishes DishTaste[]
+
+  @@map("tastes")
+}
+
+model DishIngredient {
+  dishId       Int        @map("dish_id")
+  ingredientId Int        @map("ingredient_id")
+  dish         Dish       @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@id([dishId, ingredientId])
+  @@map("dish_ingredients")
+}
+
+model DishTaste {
+  dishId  Int   @map("dish_id")
+  tasteId Int   @map("taste_id")
+  dish    Dish  @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  taste   Taste @relation(fields: [tasteId], references: [id], onDelete: Cascade)
+
+  @@id([dishId, tasteId])
+  @@map("dish_tastes")
+}
+
+model MealOrder {
+  id            Int         @id @default(autoincrement())
+  userId        Int         @map("user_id")
+  dishId        Int         @map("dish_id")
+  priceSnapshot Int         @map("price_snapshot")
+  status        String   @default("WANTED")
+  mealDate      DateTime @default(now()) @map("meal_date")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  user          User        @relation(fields: [userId], references: [id])
+  dish          Dish        @relation(fields: [dishId], references: [id])
+
+  @@map("meal_orders")
+}
+
+model FridgeItem {
+  id           Int        @id @default(autoincrement())
+  ingredientId Int        @map("ingredient_id")
+  quantity     Float
+  unit         String
+  updatedById  Int        @map("updated_by")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  updatedBy    User       @relation("FridgeUpdatedBy", fields: [updatedById], references: [id])
+
+  @@map("fridge_items")
+}
+
+model Task {
+  id         Int        @id @default(autoincrement())
+  title      String
+  content    String?
+  creatorId  Int        @map("creator_id")
+  assigneeId Int?       @map("assignee_id")
+  status     String     @default("PENDING")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  finishedAt DateTime?  @map("finished_at")
+  creator    User       @relation("TaskCreator", fields: [creatorId], references: [id])
+  assignee   User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+
+  @@map("tasks")
+}

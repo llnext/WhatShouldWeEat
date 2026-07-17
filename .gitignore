@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+.env
+data/database.sqlite
+data/database.sqlite-journal
+data/uploads/*
+!data/uploads/.gitkeep
+!data/uploads/dishes/
+!data/uploads/avatar/
+!data/uploads/dishes/.gitkeep
+!data/uploads/avatar/.gitkeep
