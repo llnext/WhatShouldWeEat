@@ -787,7 +787,7 @@ async function registerFrontend() {
     if (request.url.startsWith('/api/')) {
       return reply.code(404).send({ message: '接口不存在' });
     }
-    return reply.sendFile('index.html');
+    return reply.sendFile('index.html', frontendDistDir);
   });
 }
 
